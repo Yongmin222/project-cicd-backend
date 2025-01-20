@@ -1,4 +1,4 @@
-name: Deploy for ci/cd
+name: Backend for ci/cd
 
 # 트리거
 on:
@@ -6,7 +6,7 @@ on:
   push:
     # 대상 브런치
     branches:
-      # 대상 브런치는 main(본인 브런치명)
+      # 2. 대상 브런치는 main(본인 브런치명)
       - main
 
 # 해야될 일 => jobs
@@ -36,6 +36,10 @@ jobs:
       # 소스 코드내에 위치 (덮어쓰기?, 신규작성?)
       # RDS 세팅된 이후 진행
       # 현재는 skip
+      - name: application.properties 동적 생성
+        run: |
+          echo "${{ secrets.APPLICATION_PRO }}" > ./src/main/resources/application.properties
+          ls ./src/main/resources/
 
       # build 준비
       # chmod +x ./gradlew : 퍼미션 오류 발생시 처리
@@ -60,10 +64,12 @@ jobs:
         run: |
           mv ./build/libs/*SNAPSHOT.jar ./run.jar
           ls
+
       # EC2 로 업로드
       # https://github.com/appleboy/scp-action
       # SSH를 통해서 파일등을 복사(업로드)
       # 호스트정보(IP), 접속자명(ubuntu), 키파일(pem) -> 시크릿!!
+      # EC2_HOST
       # 업로드 대상(run.jar)
       # 타겟(EC2)의 특정 경로(복사될 위치), /home/ubuntu/server/demo
       - name: EC2에 jar파일 업로드
